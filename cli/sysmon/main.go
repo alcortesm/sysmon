@@ -7,10 +7,12 @@ import (
 	"github.com/alcortesm/sysmon/cpu"
 )
 
+const loadAvgPath = "/proc/loadavg"
+
 func main() {
-	load, err := cpu.New()
+	cpu, err := cpu.New(loadAvgPath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(load)
+	fmt.Println(cpu)
 }

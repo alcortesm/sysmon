@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const path = "/proc/loadavg"
+const LoadAvgPath = "/proc/loadavg"
 
 // Cpu values contain data about the CPU usage.
 type Cpu struct {
@@ -14,7 +14,9 @@ type Cpu struct {
 	OneMinLoadAvg float64
 }
 
-func New() (_ *Cpu, err error) {
+// New returns a Cpu value taken by reading the file at path, interpreted in
+// /proc/loadavg format.
+func New(path string) (_ *Cpu, err error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -38,6 +40,7 @@ func New() (_ *Cpu, err error) {
 	}, nil
 }
 
+// String returns a human readable representation of a Cpu value as a string.
 func (c *Cpu) String() string {
 	format := "cpu average load (1 minute) = %.0f%%"
 	return fmt.Sprintf(format, 100*c.OneMinLoadAvg)
