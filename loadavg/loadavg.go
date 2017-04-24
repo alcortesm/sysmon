@@ -1,12 +1,13 @@
-package cpu
+// Package loadavg allows to read the contents of the /proc/loadavg file.
+package loadavg
 
 import (
 	"fmt"
 	"os"
 )
 
-// Cpu values contain data about the CPU usage.
-type Cpu struct {
+// L values contain data read from /proc/loadavg.
+type L struct {
 	// OneMinLoadAvg is the average of the number of jobs in the run
 	// queue during the last minute.
 	OneMinLoadAvg float64
@@ -28,13 +29,13 @@ type Cpu struct {
 }
 
 const (
+	path         = "/proc/loadavg"
 	scanFormat   = "%f %f %f %d/%d %d"
 	stringFormat = "%.2f %.2f %.2f %d/%d %d"
 )
 
-// New returns a Cpu value taken by reading the file at path, interpreted in
-// /proc/loadavg format.
-func New(path string) (_ *Cpu, err error) {
+// New access /proc/loadavg and returns an L value with its data.
+func New() (_ *L, err error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -47,24 +48,25 @@ func New(path string) (_ *Cpu, err error) {
 		}
 	}()
 
-	var cpu Cpu
+	var l L
 	_, err = fmt.Fscanf(f, scanFormat,
-		&cpu.OneMinLoadAvg,
-		&cpu.FiveMinLoadAvg,
-		&cpu.FifteenMinLoadAvg,
-		&cpu.RunnableCount,
-		&cpu.ExistCount,
-		&cpu.LastCreatedPID,
+		&l.OneMinLoadAvg,
+		&l.FiveMinLoadAvg,
+		&l.FifteenMinLoadAvg,
+		&l.RunnableCount,
+		&l.ExistCount,
+		&l.LastCreatedPID,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	return &cpu, nil
+	return &l, nil
 }
 
-// String returns a human readable representation of a Cpu value as a string.
-func (c *Cpu) String() string {
+// String returns the data in L as a string in the same format as in
+// /proc/loadavg.
+func (c *L) String() string {
 	return fmt.Sprintf(stringFormat,
 		c.OneMinLoadAvg,
 		c.FiveMinLoadAvg,

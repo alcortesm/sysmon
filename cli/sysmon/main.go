@@ -4,15 +4,14 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/alcortesm/sysmon/cpu"
+	"github.com/alcortesm/sysmon/loadavg"
 )
 
-const loadAvgPath = "/proc/loadavg"
-
 func main() {
-	cpu, err := cpu.New(loadAvgPath)
+	l, err := loadavg.New()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(cpu)
+	fmt.Println(l)
+
 }
