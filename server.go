@@ -2,7 +2,6 @@ package sysmon
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/alcortesm/sysmon/loadavg"
 	"github.com/godbus/dbus"
@@ -14,10 +13,10 @@ const (
 	Path = "/com/github/alcortesm/sysmon"
 )
 
-func Server() {
+func Server() error {
 	conn, err := dbus.SessionBus()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer func() {
 		errClose := conn.Close()
@@ -30,16 +29,16 @@ func Server() {
 
 	reply, err := conn.RequestName(Name, dbus.NameFlagDoNotQueue)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if reply != dbus.RequestNameReplyPrimaryOwner {
-		log.Fatal("name already taken")
+		return fmt.Errorf("name already taken: %s", Name)
 	}
 
 	l, err := loadavg.New()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	fmt.Println(l)
 
