@@ -14,12 +14,12 @@ const IntrospectDataString = `<node name="` + Path + `">
 			<arg direction="out" type="d"/>
 		</method>
 		<method name="RunnableCount">
-			<arg direction="out" type="i"/>
+			<arg direction="out" type="t"/>
 		</method>
 		<method name="ExistsCount">
-			<arg direction="out" type="i"/>
+			<arg direction="out" type="t"/>
 		</method>
 		<method name="LastCreatedPID">
-			<arg direction="out" type="i"/>
+			<arg direction="out" type="t"/>
 		</method>
 	</interface>` + introspect.IntrospectDataString + `</node>`
