@@ -5,7 +5,7 @@ import "github.com/godbus/dbus/introspect"
 const IntrospectDataString = `<node name="` + Path + `">
 	<interface name="` + Name + `">
 		<method name="OneMinLoadAvg">
-			<arg direction="out" type="d"/>
+			<arg direction="out" type="ad"/>
 		</method>
 		<method name="FiveMinLoadAvg">
 			<arg direction="out" type="d"/>
