@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	InterfaceName = "com.github.alcortesm.sysmon1"
-	Path          = "/com/github/alcortesm/sysmon"
+	WellKnownBusName = "com.github.alcortesm.sysmon1"
+	InterfaceName    = WellKnownBusName
+	Path             = "/com/github/alcortesm/sysmon1"
 )
 
 func Server() error {
@@ -27,13 +28,13 @@ func Server() error {
 
 	fmt.Println(conn.Names())
 
-	reply, err := conn.RequestName(InterfaceName, dbus.NameFlagDoNotQueue)
+	reply, err := conn.RequestName(WellKnownBusName, dbus.NameFlagDoNotQueue)
 	if err != nil {
 		return err
 	}
 
 	if reply != dbus.RequestNameReplyPrimaryOwner {
-		return fmt.Errorf("name already taken: %s", InterfaceName)
+		return fmt.Errorf("name already taken: %s", WellKnownBusName)
 	}
 
 	l, err := loadavg.New()
