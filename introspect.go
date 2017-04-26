@@ -3,7 +3,7 @@ package sysmon
 import "github.com/godbus/dbus/introspect"
 
 const IntrospectDataString = `<node name="` + Path + `">
-	<interface name="` + Name + `">
+	<interface name="` + InterfaceName + `">
 		<method name="OneMinLoadAvg">
 			<arg direction="out" type="ad"/>
 		</method>

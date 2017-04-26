@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	Name = "com.github.alcortesm.sysmon"
-	Path = "/com/github/alcortesm/sysmon"
+	InterfaceName = "com.github.alcortesm.sysmon1"
+	Path          = "/com/github/alcortesm/sysmon"
 )
 
 func Server() error {
@@ -27,13 +27,13 @@ func Server() error {
 
 	fmt.Println(conn.Names())
 
-	reply, err := conn.RequestName(Name, dbus.NameFlagDoNotQueue)
+	reply, err := conn.RequestName(InterfaceName, dbus.NameFlagDoNotQueue)
 	if err != nil {
 		return err
 	}
 
 	if reply != dbus.RequestNameReplyPrimaryOwner {
-		return fmt.Errorf("name already taken: %s", Name)
+		return fmt.Errorf("name already taken: %s", InterfaceName)
 	}
 
 	l, err := loadavg.New()
@@ -42,9 +42,9 @@ func Server() error {
 	}
 	fmt.Println(l)
 
-	conn.Export(l, Path, Name)
+	conn.Export(l, Path, InterfaceName)
 	conn.Export(introspect.Introspectable(IntrospectDataString),
 		Path, "org.freedesktop.DBus.Introspectable")
-	fmt.Printf("Listening on %s, %s ...\n", Name, Path)
+	fmt.Printf("Listening on %s, %s ...\n", InterfaceName, Path)
 	select {}
 }
