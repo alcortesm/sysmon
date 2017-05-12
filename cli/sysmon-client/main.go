@@ -47,7 +47,7 @@ func report(ff []float64) string {
 	sep := ""
 	for _, f := range ff {
 		buf.WriteString(sep)
-		fmt.Fprintf(&buf, "%3.2f", f)
+		fmt.Fprintf(&buf, "%.2f", f)
 		sep = " "
 	}
 	return buf.String()
