@@ -4,17 +4,16 @@ import (
 	"log"
 	"time"
 
-	"github.com/alcortesm/sysmon"
+	"github.com/alcortesm/sysmon/server"
 )
 
 func main() {
-	quit := make(chan bool)
-	go func() {
-		err := sysmon.Server(quit)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
+	s := server.New()
+	if err := s.Connect(); err != nil {
+		log.Fatal(err)
+	}
 	time.Sleep(time.Second * 5)
-	quit <- true
+	if err := s.Disconnect(); err != nil {
+		log.Fatal(err)
+	}
 }
