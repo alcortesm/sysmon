@@ -2,17 +2,20 @@ package main
 
 import (
 	"log"
-	"time"
+	"os"
+	"os/signal"
 
 	"github.com/alcortesm/sysmon/server"
 )
 
 func main() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
 	s := server.New()
 	if err := s.Connect(); err != nil {
 		log.Fatal(err)
 	}
-	time.Sleep(time.Second * 5)
+	<-c // block until os.Interrupt is receieved
 	if err := s.Disconnect(); err != nil {
 		log.Fatal(err)
 	}

@@ -24,20 +24,16 @@ func (s *Server) Connect() error {
 		return fmt.Errorf("already connected")
 	}
 	var err error
-	s.conn, err = dbus.SessionBus()
-	if err != nil {
+	if s.conn, err = dbus.SessionBus(); err != nil {
 		return err
 	}
-	err = claimBusName(s.conn, sysmon.WellKnownBusName)
-	if err != nil {
+	if err = claimBusName(s.conn, sysmon.WellKnownBusName); err != nil {
 		return err
 	}
-	fmt.Println(s.conn.Names())
 	l, err := loadavg.New()
 	if err != nil {
 		return err
 	}
-	fmt.Println(l)
 	s.conn.Export(l, sysmon.Path, sysmon.InterfaceName)
 	s.conn.Export(introspect.Introspectable(sysmon.IntrospectDataString),
 		sysmon.Path, "org.freedesktop.DBus.Introspectable")
