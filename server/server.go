@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/alcortesm/sysmon"
 	"github.com/alcortesm/sysmon/loadavg"
@@ -30,11 +31,7 @@ func (s *Server) Connect() error {
 	if err = claimBusName(s.conn, sysmon.WellKnownBusName); err != nil {
 		return err
 	}
-	l, err := loadavg.New()
-	if err != nil {
-		return err
-	}
-	s.conn.Export(l, sysmon.Path, sysmon.InterfaceName)
+	s.conn.Export(s, sysmon.Path, sysmon.InterfaceName)
 	s.conn.Export(introspect.Introspectable(sysmon.IntrospectDataString),
 		sysmon.Path, "org.freedesktop.DBus.Introspectable")
 	fmt.Printf("Listening on %s...\n", sysmon.WellKnownBusName)
@@ -60,4 +57,17 @@ func (s *Server) Disconnect() error {
 	}
 
 	return s.conn.Close()
+}
+
+func (s *Server) LoadAvgs() (string, *dbus.Error) {
+	log.Println("Foo called")
+	l, err := loadavg.New()
+	if err != nil {
+		return "", dbus.MakeFailedError(err)
+	}
+	return l.String(), nil
+}
+
+func (s *Server) Dev() ([]float64, *dbus.Error) {
+	return []float64{1.0, 1.1, 1.2}, nil
 }
