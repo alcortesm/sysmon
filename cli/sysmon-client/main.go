@@ -1,12 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 
 	"github.com/alcortesm/sysmon"
 	"github.com/godbus/dbus"
+	"github.com/joliv/spark"
 )
 
 func main() {
@@ -42,13 +42,10 @@ func loadavgs(o dbus.BusObject) ([]float64, error) {
 	return ff, nil
 }
 
+var tail = len(spark.Line([]float64{0.0, 1.0}))
+
 func report(ff []float64) string {
-	var buf bytes.Buffer
-	sep := ""
-	for _, f := range ff {
-		buf.WriteString(sep)
-		fmt.Fprintf(&buf, "%.2f", f)
-		sep = " "
-	}
-	return buf.String()
+	withMinAndMax := append(ff, 0.0, 1.0)
+	plot := spark.Line(withMinAndMax)
+	return plot[:len(plot)-tail]
 }

@@ -14,7 +14,7 @@ import (
 
 const (
 	// amount of samples to remember
-	nSamples = 8
+	nSamples = 10
 	// sampling period
 	period = 3 * time.Second
 )
