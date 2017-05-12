@@ -1,5 +1,7 @@
 package sysmon
 
+import "github.com/godbus/dbus/introspect"
+
 const (
 	// WellKnownBusName is the D-bus "well know bus name" that the
 	// server will use for its connection.
@@ -8,6 +10,13 @@ const (
 	InterfaceName = WellKnownBusName
 	// Path is the single D-bus path the server will use.
 	Path = "/com/github/alcortesm/sysmon1"
+	// IntrospectDataString is the string that the Instrocpect method will return.
+	IntrospectDataString = `<node name="` + Path + `">
+	<interface name="` + InterfaceName + `">
+		<method name="LoadAvgs">
+			<arg direction="out" type="ad"/>
+		</method>
+	</interface>` + introspect.IntrospectDataString + `</node>`
 )
 
 // The server interface provides a higher-level API suitable for applications

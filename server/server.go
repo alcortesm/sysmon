@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/alcortesm/sysmon"
 	"github.com/alcortesm/sysmon/loadavg"
@@ -59,15 +58,14 @@ func (s *Server) Disconnect() error {
 	return s.conn.Close()
 }
 
-func (s *Server) LoadAvgs() (string, *dbus.Error) {
-	log.Println("Foo called")
+func (s *Server) LoadAvgs() ([]float64, *dbus.Error) {
 	l, err := loadavg.New()
 	if err != nil {
-		return "", dbus.MakeFailedError(err)
+		return nil, dbus.MakeFailedError(err)
 	}
-	return l.String(), nil
-}
-
-func (s *Server) Dev() ([]float64, *dbus.Error) {
-	return []float64{1.0, 1.1, 1.2}, nil
+	return []float64{
+		l.OneMinLoadAvg,
+		l.FiveMinLoadAvg,
+		l.FifteenMinLoadAvg,
+	}, nil
 }
