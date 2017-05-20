@@ -12,24 +12,24 @@ import (
 	"github.com/godbus/dbus/introspect"
 )
 
-const (
-	// amount of samples to remember
-	nSamples = 10
-	// sampling period
-	period = 3 * time.Second
-)
-
 // Server implements sysmon.Server.
 type Server struct {
+	// amount of samples to remember
+	nSamples int
+	// sampling period
+	period  time.Duration
 	conn    *dbus.Conn
 	mutex   *sync.Mutex
 	samples []float64
 }
 
-// New creates a new Server.
-func New() sysmon.Server {
+// New creates a new Server that samples /proc/loadavg every "period"
+// seconds and remembers "nSamples" samples.
+func New(nSamples int, period time.Duration) sysmon.Server {
 	return &Server{
-		mutex: &sync.Mutex{},
+		nSamples: nSamples,
+		period:   period,
+		mutex:    &sync.Mutex{},
 	}
 }
 
@@ -86,7 +86,7 @@ func (s *Server) LoadAvgs() ([]float64, *dbus.Error) {
 
 func (s *Server) run() {
 	for {
-		time.Sleep(period)
+		time.Sleep(s.period)
 		l, err := loadavg.New()
 		if err != nil {
 			log.Fatal(err)
@@ -97,8 +97,9 @@ func (s *Server) run() {
 
 func (s *Server) add(f float64) {
 	s.mutex.Lock()
+	defer fmt.Println(sysmon.FormatFloats(s.samples))
 	defer s.mutex.Unlock()
-	if len(s.samples) < nSamples {
+	if len(s.samples) < s.nSamples {
 		s.samples = append([]float64{f}, s.samples...)
 		return
 	}

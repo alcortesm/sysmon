@@ -1,6 +1,11 @@
 package sysmon
 
-import "github.com/godbus/dbus/introspect"
+import (
+	"bytes"
+	"fmt"
+
+	"github.com/godbus/dbus/introspect"
+)
 
 const (
 	// WellKnownBusName is the D-bus "well know bus name" that the
@@ -26,4 +31,16 @@ type Server interface {
 	Connect() error
 	// Disconnect disconnects the server from the D-bus system.
 	Disconnect() error
+}
+
+// FormatFloats is an utility function to format slices of load average values.
+func FormatFloats(ff []float64) string {
+	var buf bytes.Buffer
+	sep := ""
+	for _, f := range ff {
+		buf.WriteString(sep)
+		sep = " "
+		fmt.Fprintf(&buf, "%.2f", f)
+	}
+	return buf.String()
 }
