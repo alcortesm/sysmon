@@ -45,7 +45,7 @@ func loadavgs(o dbus.BusObject) ([]float64, error) {
 var tail = len(spark.Line([]float64{0.0, 1.0}))
 
 func report(ff []float64) string {
-	withMinAndMax := append(ff, 0.0, 1.0)
+	withMinAndMax := append(ff, 0.0, 100.0)
 	plot := spark.Line(withMinAndMax)
 	return plot[:len(plot)-tail]
 }

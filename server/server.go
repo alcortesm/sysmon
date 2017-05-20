@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/alcortesm/sysmon"
-	"github.com/alcortesm/sysmon/loadavg"
+	"github.com/alcortesm/sysmon/stat"
 	"github.com/godbus/dbus"
 	"github.com/godbus/dbus/introspect"
 )
@@ -17,10 +17,11 @@ type Server struct {
 	// amount of samples to remember
 	nSamples int
 	// sampling period
-	period  time.Duration
-	conn    *dbus.Conn
-	mutex   *sync.Mutex
-	samples []float64
+	period   time.Duration
+	conn     *dbus.Conn
+	mutex    *sync.Mutex
+	stats    []*stat.S
+	cpuUsage []float64
 }
 
 // New creates a new Server that samples /proc/loadavg every "period"
@@ -79,30 +80,49 @@ func (s *Server) Disconnect() error {
 func (s *Server) LoadAvgs() ([]float64, *dbus.Error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	ret := make([]float64, len(s.samples))
-	copy(ret, s.samples)
+	fmt.Println("LoadAvgs cpu usage = ", s.cpuUsage)
+	ret := make([]float64, len(s.cpuUsage))
+	copy(ret, s.cpuUsage)
 	return ret, nil
 }
 
 func (s *Server) run() {
 	for {
 		time.Sleep(s.period)
-		l, err := loadavg.New()
+		st, err := stat.New()
 		if err != nil {
 			log.Fatal(err)
 		}
-		s.add(l.OneMinLoadAvg)
+		s.add(st)
 	}
 }
 
-func (s *Server) add(f float64) {
+func (s *Server) add(st *stat.S) {
 	s.mutex.Lock()
-	defer fmt.Println(sysmon.FormatFloats(s.samples))
 	defer s.mutex.Unlock()
-	if len(s.samples) < s.nSamples {
-		s.samples = append([]float64{f}, s.samples...)
+	defer s.updateCPUUsage()
+	if len(s.stats) < s.nSamples {
+		s.stats = append([]*stat.S{st}, s.stats...)
 		return
 	}
-	copy(s.samples[1:], s.samples[:len(s.samples)-1])
-	s.samples[0] = f
+	copy(s.stats[1:], s.stats[:len(s.stats)-1])
+	s.stats[0] = st
+}
+
+func (s *Server) updateCPUUsage() {
+	if len(s.stats) < 2 {
+		return
+	}
+
+	current, _ := s.stats[0], s.stats[1]
+	percentage := float64(current.TotalCPU()) / float64(current.Total())
+	percentage *= 100
+	fmt.Println(percentage, "%")
+
+	if len(s.cpuUsage) < s.nSamples-1 {
+		s.cpuUsage = append([]float64{percentage}, s.cpuUsage...)
+		return
+	}
+	copy(s.cpuUsage[1:], s.cpuUsage[:len(s.cpuUsage)-1])
+	s.cpuUsage[0] = percentage
 }
