@@ -16,18 +16,8 @@ func client() error {
 	if err != nil {
 		return err
 	}
-	ok, err := isServerRunning(conn)
-	if err != nil {
+	if err := makeSureServerIsRunning(conn); err != nil {
 		return err
-	}
-	if !ok {
-		cmd := exec.Command("sysmon-server")
-		err = cmd.Start()
-		if err != nil {
-			return err
-		}
-		cmd.Process.Release()
-		time.Sleep(time.Second) // TODO fix this by waiting on a select with a timeout
 	}
 	obj := conn.Object(sysmon.WellKnownBusName, sysmon.Path)
 	ff, err := cpuUsageHistory(obj)
@@ -84,4 +74,52 @@ func report(ff []float64) string {
 	withMinAndMax := append(ff, 0, 100)
 	plot := spark.Line(withMinAndMax)
 	return plot[:len(plot)-tail]
+}
+
+func makeSureServerIsRunning(c *dbus.Conn) error {
+	ok, err := isServerRunning(c)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		if err := runServer(); err != nil {
+			return err
+		}
+		return waitForServer(c)
+	}
+	return nil
+}
+
+func runServer() error {
+	cmd := exec.Command("sysmon-server")
+	err := cmd.Start()
+	if err != nil {
+		return err
+	}
+	cmd.Process.Release()
+	return nil
+}
+
+var (
+	timeoutDuration    = time.Second
+	poolServerDuration = 100 * time.Millisecond // TODO: implemente a backoff here
+)
+
+func waitForServer(c *dbus.Conn) error {
+	timeout := time.After(timeoutDuration)
+	for {
+		pool := time.After(poolServerDuration)
+		select {
+		case <-timeout:
+			return fmt.Errorf("timeout waiting for server")
+		case <-pool:
+			ok, err := isServerRunning(c)
+			if err != nil {
+				return err
+			}
+			if ok {
+				return nil
+			}
+		}
+	}
 }
