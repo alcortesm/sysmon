@@ -15,7 +15,7 @@ func main() {
 		log.Fatal(err)
 	}
 	obj := conn.Object(sysmon.WellKnownBusName, sysmon.Path)
-	ff, err := loadavgs(obj)
+	ff, err := cpuUsageHistory(obj)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -25,9 +25,8 @@ func main() {
 	}
 }
 
-func loadavgs(o dbus.BusObject) ([]float64, error) {
-	method := "com.github.alcortesm.sysmon1.LoadAvgs"
-	resp := o.Call(method, 0)
+func cpuUsageHistory(o dbus.BusObject) ([]float64, error) {
+	resp := o.Call(sysmon.CPUsUsageHistoryMethod, 0)
 	if resp.Err != nil {
 		return nil, resp.Err
 	}
@@ -45,7 +44,7 @@ func loadavgs(o dbus.BusObject) ([]float64, error) {
 var tail = len(spark.Line([]float64{0.0, 1.0}))
 
 func report(ff []float64) string {
-	withMinAndMax := append(ff, 0.0, 1.0)
+	withMinAndMax := append(ff, 0, 100)
 	plot := spark.Line(withMinAndMax)
 	return plot[:len(plot)-tail]
 }
