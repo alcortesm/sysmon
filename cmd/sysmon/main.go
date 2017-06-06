@@ -31,9 +31,6 @@ func main() {
 		usageAndExit()
 	}
 
-	fmt.Println("SamplingPeriod", SamplingPeriod)
-	fmt.Println("NSamples", NSamples)
-
 	if err := client(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
