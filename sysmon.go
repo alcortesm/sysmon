@@ -25,7 +25,7 @@ const (
 )
 
 // The server interface provides a higher-level API suitable for applications
-// to run, access and shutdown sysmon servers.
+// to run and shutdown sysmon servers.
 type Server interface {
 	// Connect connects the server to the D-bus system.
 	Connect() error
@@ -33,7 +33,7 @@ type Server interface {
 	Disconnect() error
 }
 
-// FormatFloats is an utility function to format slices of load average values.
+// FormatFloats is an utility function to format slices of float values.
 func FormatFloats(ff []float64) string {
 	var buf bytes.Buffer
 	sep := ""
