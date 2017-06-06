@@ -80,11 +80,10 @@ func (s *Server) Disconnect() error {
 	return s.conn.Close()
 }
 
-// backwards compatibility until /proc/stats is working.
-func (s *Server) LoadAvgs() ([]float64, *dbus.Error) {
+// CPUsUsageHistory implements sysmon.Server.
+func (s *Server) CPUsUsageHistory() ([]float64, *dbus.Error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	fmt.Println("LoadAvgs cpu usage = ", s.cpuUsage)
 	ret := make([]float64, len(s.cpuUsage))
 	copy(ret, s.cpuUsage)
 	return ret, nil
