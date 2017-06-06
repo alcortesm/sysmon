@@ -4,41 +4,45 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"sort"
+	"time"
 )
 
-var commands = map[string]func(*State, ...string){
-	"client": (*State).client,
-	"server": (*State).server,
-}
+var (
+	samplingPeriodFlag = durationFlag(time.Second)
+	// SamplingPeriod is how often do we sample /proc/stats.
+	SamplingPeriod time.Duration
 
-type State struct{}
+	defaultNSamples = 20
+	// NSamples is how many samples to remember.
+	NSamples int
+)
+
+func init() {
+	flag.Var(&samplingPeriodFlag, "p", "sampling period")
+	flag.IntVar(&NSamples, "n", defaultNSamples, "number of samples to remember")
+}
 
 func main() {
 	flag.Usage = usage
 	flag.Parse()
+	SamplingPeriod = samplingPeriodFlag.duration()
+
+	if len(flag.Args()) != 0 {
+		usageAndExit()
+	}
+
+	fmt.Println("SamplingPeriod", SamplingPeriod)
+	fmt.Println("NSamples", NSamples)
 }
 
 func usage() {
 	fmt.Fprintf(os.Stderr, "Usage of sysmon:\n")
-	fmt.Fprintf(os.Stderr, "\tsysmon [command] [flags]\n")
-	printCommands()
+	fmt.Fprintf(os.Stderr, "\tsysmon [flags]\n")
+	fmt.Fprintf(os.Stderr, "Flags:\n")
 	flag.PrintDefaults()
 }
 
-func usageAndExit(fs *flag.FlagSet) {
+func usageAndExit() {
 	usage()
 	os.Exit(2)
-}
-
-func printCommands() {
-	fmt.Fprintf(os.Stderr, "Sysmon commands:\n")
-	var cmdStrs []string
-	for cmd := range commands {
-		cmdStrs = append(cmdStrs, cmd)
-	}
-	sort.Strings(cmdStrs)
-	for _, cmd := range cmdStrs {
-		fmt.Fprintf(os.Stderr, "\t%s\n", cmd)
-	}
 }
