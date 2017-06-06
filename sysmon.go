@@ -1,9 +1,6 @@
 package sysmon
 
 import (
-	"bytes"
-	"fmt"
-
 	"github.com/godbus/dbus/introspect"
 )
 
@@ -31,16 +28,4 @@ type Server interface {
 	Connect() error
 	// Disconnect disconnects the server from the D-bus system.
 	Disconnect() error
-}
-
-// FormatFloats is an utility function to format slices of float values.
-func FormatFloats(ff []float64) string {
-	var buf bytes.Buffer
-	sep := ""
-	for _, f := range ff {
-		buf.WriteString(sep)
-		sep = " "
-		fmt.Fprintf(&buf, "%.2f", f)
-	}
-	return buf.String()
 }
