@@ -8,7 +8,7 @@ import (
 // S values contain the amount of time spent by the CPU in different
 // states, measured in USER_HZ (1/100 secs in most systems).
 //
-// This assumes Linux > 2.6.33
+// This assumes Linux > 2.6.33.
 type S struct {
 	// Time spent in user mode.
 	User int
@@ -104,4 +104,17 @@ func (s *S) TotalIdle() int {
 
 func (s *S) TotalCPU() int {
 	return s.Total() - s.TotalIdle()
+}
+
+// CPUUsage percentage calculated from two stats samples.
+func CPUUsage(cur, prev *S) float64 {
+	cpu := cur.TotalCPU() - prev.TotalCPU()
+	total := cur.Total() - prev.Total()
+	percentage := 100 * float64(cpu) / float64(total)
+	if percentage > 100 {
+		return 100
+	} else if percentage < 0 {
+		return 0
+	}
+	return percentage
 }

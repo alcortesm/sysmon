@@ -17,15 +17,19 @@ type Server struct {
 	// amount of samples to remember
 	nSamples int
 	// sampling period
-	period   time.Duration
-	conn     *dbus.Conn
-	mutex    *sync.Mutex
-	stats    []*stat.S
+	period time.Duration
+	conn   *dbus.Conn
+	// prevents clients requests from reading while the server is
+	// collecting new data.
+	mutex *sync.Mutex
+	// last nSamples stats collected.
+	stats []*stat.S
+	// cpu usage values extracted from stats.
 	cpuUsage []float64
 }
 
-// New creates a new Server that samples /proc/loadavg every "period"
-// seconds and remembers "nSamples" samples.
+// New creates a new sysmon.Server that samples /proc/stats every "period"
+// and remembers "nSamples" samples.
 func New(nSamples int, period time.Duration) sysmon.Server {
 	return &Server{
 		nSamples: nSamples,
@@ -76,7 +80,7 @@ func (s *Server) Disconnect() error {
 	return s.conn.Close()
 }
 
-// LoadAvgs implements sysmon.Server.
+// backwards compatibility until /proc/stats is working.
 func (s *Server) LoadAvgs() ([]float64, *dbus.Error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -113,12 +117,7 @@ func (s *Server) updateCPUUsage() {
 	if len(s.stats) < 2 {
 		return
 	}
-
-	current, _ := s.stats[0], s.stats[1]
-	percentage := float64(current.TotalCPU()) / float64(current.Total())
-	percentage *= 100
-	fmt.Println(percentage, "%")
-
+	percentage := stat.CPUUsage(s.stats[0], s.stats[1])
 	if len(s.cpuUsage) < s.nSamples-1 {
 		s.cpuUsage = append([]float64{percentage}, s.cpuUsage...)
 		return
