@@ -2,27 +2,64 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"os/exec"
+	"time"
 
 	"github.com/alcortesm/sysmon"
+
 	"github.com/godbus/dbus"
 	"github.com/joliv/spark"
 )
 
-func main() {
+func client() error {
 	conn, err := dbus.SessionBus()
 	if err != nil {
-		log.Fatal(err)
+		return err
+	}
+	ok, err := isServerRunning(conn)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		cmd := exec.Command("sysmon-server")
+		err = cmd.Start()
+		if err != nil {
+			return err
+		}
+		cmd.Process.Release()
+		time.Sleep(time.Second) // TODO fix this by waiting on a select with a timeout
 	}
 	obj := conn.Object(sysmon.WellKnownBusName, sysmon.Path)
 	ff, err := cpuUsageHistory(obj)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	fmt.Println(report(ff))
 	if err := conn.Close(); err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
+}
+
+const listNames = "org.freedesktop.DBus.ListNames"
+
+// TODO: search for a better way to know if the server is running
+func isServerRunning(c *dbus.Conn) (bool, error) {
+	var s []string
+	err := c.BusObject().Call(listNames, 0).Store(&s)
+	if err != nil {
+		return false,
+			fmt.Errorf("failed to get list of session dbus owned names:", err)
+	}
+
+	for _, v := range s {
+		if v == sysmon.WellKnownBusName {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func cpuUsageHistory(o dbus.BusObject) ([]float64, error) {
