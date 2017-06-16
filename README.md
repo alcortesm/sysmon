@@ -2,4 +2,4 @@
 
 Shows a graph with the recent CPU usage history in your i3 status bar.
 
-![demo](https://cloud.githubusercontent.com/assets/9169414/26829732/e2d91444-4ac6-11e7-98c3-573c9d64e8be.gif)
+![demo](https://user-images.githubusercontent.com/9169414/27219459-1259c32c-5282-11e7-847d-7e106e8f0fb6.gif)
