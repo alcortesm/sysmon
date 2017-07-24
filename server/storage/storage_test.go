@@ -9,7 +9,7 @@ import (
 )
 
 func mustNew(t *testing.T, capacity int) storage.Storage {
-	s, err := storage.NewOld(capacity)
+	s, err := storage.NewCBuf(capacity)
 	if err != nil {
 		t.Fatalf("capacity %d: %s", capacity, err)
 	}

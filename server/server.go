@@ -24,7 +24,7 @@ type Server struct {
 // New creates a new sysmon.Server that samples /proc/stats every "period"
 // and remembers "nSamples" samples.
 func New(nSamples int, period time.Duration) (sysmon.Server, error) {
-	s, err := storage.NewOld(nSamples)
+	s, err := storage.NewCBuf(nSamples)
 	if err != nil {
 		return nil, err
 	}
