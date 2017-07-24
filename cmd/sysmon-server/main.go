@@ -15,7 +15,10 @@ func main() {
 
 	nSamples := 20
 	samplingPeriod := time.Second
-	s := server.New(nSamples, samplingPeriod)
+	s, err := server.New(nSamples, samplingPeriod)
+	if err != nil {
+		log.Fatal(err)
+	}
 	if err := s.Connect(); err != nil {
 		log.Fatal(err)
 	}

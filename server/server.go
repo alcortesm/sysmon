@@ -3,39 +3,36 @@ package server
 import (
 	"fmt"
 	"log"
-	"sync"
 	"time"
 
-	"github.com/alcortesm/sysmon"
-	"github.com/alcortesm/sysmon/stat"
 	"github.com/godbus/dbus"
 	"github.com/godbus/dbus/introspect"
+
+	"github.com/alcortesm/sysmon"
+	"github.com/alcortesm/sysmon/server/storage"
+	"github.com/alcortesm/sysmon/stat"
 )
 
 // Server implements sysmon.Server.
 type Server struct {
-	// amount of samples to remember
-	nSamples int
 	// sampling period
-	period time.Duration
-	conn   *dbus.Conn
-	// prevents clients requests from reading while the server is
-	// collecting new data.
-	mutex *sync.Mutex
-	// last nSamples stats collected.
-	stats []*stat.S
-	// cpu usage values extracted from stats.
-	cpuUsage []float64
+	period  time.Duration
+	conn    *dbus.Conn
+	storage storage.Storage
 }
 
 // New creates a new sysmon.Server that samples /proc/stats every "period"
 // and remembers "nSamples" samples.
-func New(nSamples int, period time.Duration) sysmon.Server {
-	return &Server{
-		nSamples: nSamples,
-		period:   period,
-		mutex:    &sync.Mutex{},
+func New(nSamples int, period time.Duration) (sysmon.Server, error) {
+	s, err := storage.NewCBuf(nSamples)
+	if err != nil {
+		return nil, err
 	}
+
+	return &Server{
+		period:  period,
+		storage: s,
+	}, nil
 }
 
 // Connect implements sysmon.Server.
@@ -82,11 +79,7 @@ func (s *Server) Disconnect() error {
 
 // CPUsUsageHistory implements sysmon.Server.
 func (s *Server) CPUsUsageHistory() ([]float64, *dbus.Error) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	ret := make([]float64, len(s.cpuUsage))
-	copy(ret, s.cpuUsage)
-	return ret, nil
+	return s.storage.CPUUsage(), nil
 }
 
 func (s *Server) run() {
@@ -96,31 +89,6 @@ func (s *Server) run() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		s.add(st)
+		s.storage.Insert(st)
 	}
-}
-
-func (s *Server) add(st *stat.S) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	defer s.updateCPUUsage()
-	if len(s.stats) < s.nSamples {
-		s.stats = append([]*stat.S{st}, s.stats...)
-		return
-	}
-	copy(s.stats[1:], s.stats[:len(s.stats)-1])
-	s.stats[0] = st
-}
-
-func (s *Server) updateCPUUsage() {
-	if len(s.stats) < 2 {
-		return
-	}
-	percentage := stat.CPUUsage(s.stats[0], s.stats[1])
-	if len(s.cpuUsage) < s.nSamples-1 {
-		s.cpuUsage = append([]float64{percentage}, s.cpuUsage...)
-		return
-	}
-	copy(s.cpuUsage[1:], s.cpuUsage[:len(s.cpuUsage)-1])
-	s.cpuUsage[0] = percentage
 }
