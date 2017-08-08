@@ -12,38 +12,35 @@ go get github.com/alcortesm/sysmon
 
 # Usage
 
-To use sysmon as part of your i3status bar,
-create an executable script as follows
-and add it to your path: 
+To use sysmon as part of your i3status bar:
 
-```
-#!/bin/bash
-i3status | while :
-do
-    read line
-    load=`sysmon`
-    echo "sysmon: $load | $line" || exit 1
-done
-```
+1. Create an executable script as follows
+   and add it to your path: 
 
-This will call the regular i3status command
-and the sysmon command
-and combine their outputs into a single line.
+    ```
+    #!/bin/bash
+    i3status | while :
+    do
+        read line
+        load=`sysmon`
+        echo "sysmon: $load | $line" || exit 1
+    done
+    ```
 
-For purpose of demonstration,
-we will call this script `i3status_with_sysmon`.
+    This will call the regular i3status command
+    and the sysmon command
+    and combine their outputs into a single line.
 
-Now tell i3 to run your script,
-instead of running i3status,
-by modifying the `.i3/conf` file:
+    For purpose of demonstration,
+    we will call this script `i3status_with_sysmon`.
 
-```
-bar {                                                                           
-#    status_command i3status                                               
-    status_command i3status_with_sysmon                                               
-}
-```
+2. Now modify your `.i3/conf` file,
+   to tell i3 to run your script,
+   instead of the regular i3status command:
 
-
-
-
+   ```
+   bar {                                                                           
+   #    status_command i3status                                               
+       status_command i3status_with_sysmon                                               
+   }
+   ```
