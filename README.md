@@ -30,6 +30,9 @@ This will call the regular i3status command
 and the sysmon command
 and combine their outputs into a single line.
 
+For purpose of demonstration,
+we will call this script `i3status_with_sysmon`.
+
 Now tell i3 to run your script,
 instead of running i3status,
 by modifying the `.i3/conf` file:
