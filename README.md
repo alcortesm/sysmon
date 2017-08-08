@@ -12,20 +12,9 @@ go get github.com/alcortesm/sysmon
 
 # Usage
 
-Normally,
-you configure your i3 window manager
-to run the i3status bar
-by adding the following lines to the `i3/conf` file:
-
-```
-bar {                                                                           
-    status_command i3status                                               
-}
-```
-
-To use sysmon as part of your i3status,
+To use sysmon as part of your i3status bar,
 create an executable script as follows
-anywhere inside your path: 
+and add it to your path: 
 
 ```
 #!/bin/bash
@@ -37,12 +26,18 @@ do
 done
 ```
 
-and call it from your `.i3/conf` file:
+This will call the regular i3status command
+and the sysmon command
+and combine their outputs into a single line.
+
+Now tell i3 to run your script,
+instead of running i3status,
+by modifying the `.i3/conf` file:
 
 ```
 bar {                                                                           
 #    status_command i3status                                               
-    status_command myi3status                                               
+    status_command i3status_with_sysmon                                               
 }
 ```
 
