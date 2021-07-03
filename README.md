@@ -6,9 +6,10 @@ Shows a graph with the recent CPU usage history in your i3 status bar.
 
 # Installation
 
-`
-go get github.com/alcortesm/sysmon
-`
+```
+; go install github.com/alcortesm/sysmon/cmd/sysmon@latest
+; go install github.com/alcortesm/sysmon/cmd/sysmon-server@latest
+```
 
 # Usage
 
