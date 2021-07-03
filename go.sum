@@ -1,0 +1,4 @@
+github.com/godbus/dbus v4.1.0+incompatible h1:WqqLRTsQic3apZUK9qC5sGNfXthmPXzUZ7nQPrNITa4=
+github.com/godbus/dbus v4.1.0+incompatible/go.mod h1:/YcGZj5zSblfDWMMoOzV4fas9FZnQYTkDnsGvmh2Grw=
+github.com/joliv/spark v0.0.0-20151215235333-2d625891bea1 h1:OPh2F8Dxm/Hf9EM7RrKlTdbPTT+J9l1e0JJhZBW0Un4=
+github.com/joliv/spark v0.0.0-20151215235333-2d625891bea1/go.mod h1:9naDYeY0QbViN+02yKWdzKqt/btnAQPJgTmW9ZzdvhQ=
